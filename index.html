@@ -6,15 +6,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silicon Suite - Premium macOS Utilities</title>
     <meta name="description"
-        content="A collection of privacy-first, professional macOS utilities. GhostPDF, CleverGhost, BibKit, PDFShuffle, SteadyFlow, and LaTeX & BibTeX Tools.">
+        content="A collection of privacy-first, professional macOS utilities. GhostPDF, CleverGhost, AutoPlot, BibKit, GhostTeX, SteadyFlow, FlowCompressor, PDFShuffle, and LaTeX & BibTeX Tools.">
+    <meta name="theme-color" content="#000000">
+    <link rel="icon" href="./assets/siliconsuite-s-icon.png">
+    <meta property="og:title" content="Silicon Suite — Crafted for macOS">
+    <meta property="og:description"
+        content="Privacy-first native Mac utilities. Everything runs on your machine. No tracking, no uploads.">
+    <meta property="og:image" content="./assets/siliconsuite-s-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script data-goatcounter="https://oguzumut.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <style>
+        :root {
+            --ring: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            /* keep <html> the scroll container: overflow-x on <body> would steal it */
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #000;
@@ -28,6 +48,10 @@
             font-family: 'Outfit', sans-serif;
         }
 
+        .mono {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+        }
+
         .gradient-text {
             background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
             -webkit-background-clip: text;
@@ -35,311 +59,884 @@
             -webkit-text-fill-color: transparent;
         }
 
+        /* ---------- Ambient background ---------- */
+        .aurora {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .aurora span {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(110px);
+            opacity: 0.45;
+            will-change: transform;
+        }
+
+        .aurora .a1 {
+            width: 46vw;
+            height: 46vw;
+            background: #1d4ed8;
+            top: -12vw;
+            left: -8vw;
+            animation: drift1 26s ease-in-out infinite;
+        }
+
+        .aurora .a2 {
+            width: 40vw;
+            height: 40vw;
+            background: #7e22ce;
+            top: 20vh;
+            right: -10vw;
+            animation: drift2 32s ease-in-out infinite;
+        }
+
+        .aurora .a3 {
+            width: 38vw;
+            height: 38vw;
+            background: #0d9488;
+            bottom: -14vw;
+            left: 25vw;
+            animation: drift3 29s ease-in-out infinite;
+        }
+
+        @keyframes drift1 {
+
+            0%,
+            100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate3d(8vw, 10vh, 0) scale(1.15);
+            }
+        }
+
+        @keyframes drift2 {
+
+            0%,
+            100% {
+                transform: translate3d(0, 0, 0) scale(1.1);
+            }
+
+            50% {
+                transform: translate3d(-10vw, 12vh, 0) scale(0.9);
+            }
+        }
+
+        @keyframes drift3 {
+
+            0%,
+            100% {
+                transform: translate3d(0, 0, 0) scale(0.95);
+            }
+
+            50% {
+                transform: translate3d(6vw, -12vh, 0) scale(1.2);
+            }
+        }
+
+        .grid-veil {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+            background-size: 64px 64px;
+            mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 75%);
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+            pointer-events: none;
+            opacity: .035;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ---------- Scroll progress ---------- */
+        #progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: 0 50%;
+            background: linear-gradient(90deg, #60a5fa, #c084fc, #2dd4bf);
+            z-index: 60;
+        }
+
+        /* ---------- Cards ---------- */
         .suite-card {
+            position: relative;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--ring);
             backdrop-filter: blur(20px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            transition: transform .45s cubic-bezier(.2, .7, .2, 1), background .4s ease, border-color .4s ease, box-shadow .4s ease, opacity .5s ease;
+        }
+
+        .suite-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity .35s ease;
+            background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .10), transparent 60%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .suite-card:hover::before {
+            opacity: 1;
         }
 
         .suite-card:hover {
-            transform: translateY(-5px) scale(1.02);
             background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, .55);
+        }
+
+        .suite-card>* {
+            transform: translateZ(28px);
         }
 
         .app-icon {
             box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease;
+            transition: transform .45s cubic-bezier(.2, .7, .2, 1), box-shadow .45s ease;
         }
 
         .suite-card:hover .app-icon {
-            transform: scale(1.05);
+            transform: scale(1.08) rotate(-3deg);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .5);
+        }
+
+        .card-hidden {
+            display: none !important;
+        }
+
+        /* ---------- Reveal ---------- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(26px);
+            transition: opacity .7s cubic-bezier(.2, .7, .2, 1), transform .7s cubic-bezier(.2, .7, .2, 1);
+        }
+
+        .reveal.in {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* ---------- Filters ---------- */
+        .pill {
+            border: 1px solid var(--ring);
+            background: rgba(255, 255, 255, .03);
+            transition: all .25s ease;
+        }
+
+        .pill:hover {
+            border-color: rgba(255, 255, 255, .25);
+            color: #fff;
+        }
+
+        .pill[aria-pressed="true"] {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+
+        .platform {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 10px;
+            letter-spacing: .06em;
+            color: rgba(255, 255, 255, .55);
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .04);
+            border-radius: 8px;
+            padding: 4px 9px;
+            white-space: nowrap;
+        }
+
+        /* ---------- Marquee ---------- */
+        .marquee {
+            overflow: hidden;
+            mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+        }
+
+        .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: slide 38s linear infinite;
+        }
+
+        .marquee:hover .marquee-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes slide {
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* ---------- Caret / misc ---------- */
+        .type-caret::after {
+            content: "";
+            display: inline-block;
+            width: .06em;
+            height: 1em;
+            background: currentColor;
+            margin-left: .08em;
+            vertical-align: -0.08em;
+            animation: blink 1.05s steps(1) infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            49% {
+                opacity: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            html {
+                scroll-behavior: auto;
+            }
+
+            .aurora span,
+            .marquee-track,
+            .type-caret::after {
+                animation: none !important;
+            }
+
+            .reveal {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+
+            .suite-card,
+            .app-icon {
+                transition: none !important;
+            }
         }
     </style>
+    <noscript>
+        <style>
+            .reveal {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        </style>
+    </noscript>
 </head>
 
 <body class="antialiased min-h-screen flex flex-col selection:bg-white selection:text-black">
 
+    <div id="progress"></div>
+    <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span>
+    </div>
+    <div class="grid-veil" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
     <!-- Navigation -->
-    <nav class="w-full py-6 px-6 max-w-7xl mx-auto flex justify-between items-center z-50">
-        <div class="flex items-center gap-2">
-            <div
-                class="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-400 flex items-center justify-center text-black font-bold text-lg border border-white/20">
-                S</div>
-            <span class="text-xl font-bold tracking-tight brand-font">Silicon Suite</span>
-        </div>
-        <div class="flex gap-6">
-            <a href="mailto:ou.salman@icloud.com"
-                class="text-sm font-medium text-gray-400 hover:text-white transition">Contact</a>
+    <nav id="nav"
+        class="sticky top-0 w-full z-50 border-b border-transparent transition-all duration-300 backdrop-blur-0">
+        <div class="max-w-7xl mx-auto py-4 px-6 flex justify-between items-center">
+            <a href="#top" class="flex items-center gap-2 group">
+                <div
+                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-400 flex items-center justify-center text-black font-bold text-lg border border-white/20 transition-transform duration-300 group-hover:rotate-12">
+                    S</div>
+                <span class="text-xl font-bold tracking-tight brand-font">Silicon Suite</span>
+            </a>
+            <div class="flex items-center gap-5">
+                <a href="#apps" class="hidden sm:block text-sm font-medium text-gray-400 hover:text-white transition">Apps</a>
+                <a href="#why" class="hidden sm:block text-sm font-medium text-gray-400 hover:text-white transition">Why</a>
+                <a href="mailto:ou.salman@icloud.com"
+                    class="text-sm font-medium px-4 py-2 rounded-full bg-white text-black hover:bg-gray-200 transition">Contact</a>
+            </div>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <main class="flex-grow flex flex-col justify-center items-center px-6 pt-20 pb-32 max-w-7xl mx-auto w-full">
+    <main id="top" class="flex-grow flex flex-col items-center px-6 pt-16 pb-32 max-w-7xl mx-auto w-full">
 
-        <div class="text-center mb-24 max-w-3xl mx-auto">
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
-                Crafted for <span class="gradient-text">macOS.</span>
+        <!-- Hero -->
+        <div class="text-center mb-14 max-w-3xl mx-auto">
+            <div
+                class="inline-flex items-center gap-2 mb-8 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs text-gray-300 mono">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+                9 apps shipping · built for Apple Silicon
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.05]">
+                Software that
+                <span class="gradient-text type-caret" id="rotator">minds its own business.</span>
             </h1>
-            <p class="text-xl md:text-2xl text-gray-400 leading-relaxed font-light">
-                A suite of powerful, privacy-first native utilities. <br class="hidden md:block">No subscriptions. No
-                tracking. Just software that works.
+            <p class="text-xl md:text-2xl text-gray-400 leading-relaxed font-light mb-10">
+                Native Mac utilities that do the work on <em class="not-italic text-white">your</em> machine.
+                <br class="hidden md:block">Nothing is uploaded. No telemetry. No nonsense.
             </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <a href="#apps"
+                    class="px-6 py-3 rounded-full bg-white text-black font-semibold hover:scale-105 active:scale-95 transition-transform">Browse
+                    the suite</a>
+                <button id="luckyBtn"
+                    class="px-6 py-3 rounded-full border border-white/15 bg-white/5 font-semibold text-gray-200 hover:bg-white/10 hover:border-white/30 transition">I'm
+                    feeling lucky</button>
+            </div>
+
+            <div class="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-gray-500 mono">
+                <span><span class="text-white font-semibold" data-count="9">0</span> apps</span>
+                <span><span class="text-white font-semibold" data-count="100">0</span>% on-device</span>
+                <span><span class="text-white font-semibold" data-count="0">0</span> trackers</span>
+                <span><span class="text-white font-semibold" data-count="0">0</span> uploads</span>
+            </div>
+        </div>
+
+        <!-- Marquee -->
+        <div class="marquee w-screen -mx-6 mb-20 py-3 border-y border-white/5 bg-white/[0.02]">
+            <div class="marquee-track text-sm mono text-gray-500">
+                <div class="flex shrink-0">
+                    <span class="px-6">PDF compression</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">on-device AI</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">BibTeX libraries</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">handwriting → LaTeX</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">beat-synced video</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">batch encoding</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">page shuffling</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">manuscript prep</span><span class="px-6 text-gray-700">/</span>
+                </div>
+                <div class="flex shrink-0" aria-hidden="true">
+                    <span class="px-6">PDF compression</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">on-device AI</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">BibTeX libraries</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">handwriting → LaTeX</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">beat-synced video</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">batch encoding</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">page shuffling</span><span class="px-6 text-gray-700">/</span>
+                    <span class="px-6">manuscript prep</span><span class="px-6 text-gray-700">/</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div id="apps" class="w-full max-w-6xl mb-10 scroll-mt-24">
+            <div class="mb-8">
+                <h2 class="text-3xl md:text-4xl font-bold brand-font mb-2">The suite</h2>
+                <p class="text-gray-500">Pick a job. There's probably an app for it.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-2" role="group" aria-label="Filter apps by category">
+                <button class="pill px-4 py-2 rounded-full text-sm font-medium text-gray-300" data-filter="all"
+                    aria-pressed="true">All</button>
+                <button class="pill px-4 py-2 rounded-full text-sm font-medium text-gray-300" data-filter="pdf"
+                    aria-pressed="false">PDF</button>
+                <button class="pill px-4 py-2 rounded-full text-sm font-medium text-gray-300" data-filter="ai"
+                    aria-pressed="false">AI</button>
+                <button class="pill px-4 py-2 rounded-full text-sm font-medium text-gray-300" data-filter="data"
+                    aria-pressed="false">Data</button>
+                <button class="pill px-4 py-2 rounded-full text-sm font-medium text-gray-300" data-filter="latex"
+                    aria-pressed="false">LaTeX</button>
+                <button class="pill px-4 py-2 rounded-full text-sm font-medium text-gray-300" data-filter="video"
+                    aria-pressed="false">Video</button>
+            </div>
         </div>
 
         <!-- App Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
 
             <!-- GhostPDF+ -->
-            <a href="https://siliconsuite.app/GhostPDF-Bundle/"
-                class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
+            <a href="https://siliconsuite.app/GhostPDF-Bundle/" data-tags="pdf"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
                 <div
                     class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/30 transition-colors duration-500">
                 </div>
 
                 <div class="relative z-10 flex-grow">
                     <img src="./assets/ghostpdf.jpg" alt="GhostPDF+ Icon"
-                        class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
-                    <h2 class="text-3xl font-bold mb-3">GhostPDF+</h2>
-                    <p class="text-gray-400 text-lg leading-relaxed">
-                        The ultimate offline PDF compressor. Shrink files, not privacy. Powered by Ghostscript.
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
+                    <h2 class="text-2xl font-bold mb-3">GhostPDF+</h2>
+                    <p class="text-gray-400 leading-relaxed">
+                        The ultimate offline PDF compressor. Shrink files, not privacy — every page is processed on your Mac.
                     </p>
                 </div>
-                <div
-                    class="relative z-10 mt-8 flex items-center text-blue-400 font-semibold group-hover:translate-x-1 transition-transform">
-                    View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
+                <div class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-blue-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac</span>
                 </div>
             </a>
 
             <!-- CleverGhost -->
-            <a href="https://siliconsuite.app/CleverGhost/"
-                class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
+            <a href="https://siliconsuite.app/CleverGhost/" data-tags="pdf ai"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
                 <div
                     class="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-500/30 transition-colors duration-500">
                 </div>
 
                 <div class="relative z-10 flex-grow">
                     <img src="./assets/cleverghost.jpg" alt="CleverGhost Icon"
-                        class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
-                    <h2 class="text-3xl font-bold mb-3">CleverGhost</h2>
-                    <p class="text-gray-400 text-lg leading-relaxed">
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
+                    <h2 class="text-2xl font-bold mb-3">CleverGhost</h2>
+                    <p class="text-gray-400 leading-relaxed">
                         On-device AI document analysis. Chat with your PDFs locally, securely, and intelligently.
                     </p>
                 </div>
+                <div class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-purple-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac</span>
+                </div>
+            </a>
+
+            <!-- AutoPlot -->
+            <a href="https://autoplot.ai" data-tags="data ai"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
                 <div
-                    class="relative z-10 mt-8 flex items-center text-purple-400 font-semibold group-hover:translate-x-1 transition-transform">
-                    View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
+                    class="absolute top-0 right-0 w-64 h-64 bg-green-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-green-500/30 transition-colors duration-500">
+                </div>
+
+                <div class="relative z-10 flex-grow">
+                    <img src="./assets/autoplot.png" alt="AutoPlot Icon"
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
+                    <h2 class="text-2xl font-bold mb-3">AutoPlot</h2>
+                    <p class="text-gray-400 leading-relaxed">
+                        Scientific plotting and analysis in one native workspace. Import messy data, fit it, plot in 2D
+                        and 3D, and publish figures whose annotations survive a re-run.
+                    </p>
+                </div>
+                <div class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-green-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac</span>
                 </div>
             </a>
 
             <!-- BibKit -->
-            <a href="https://siliconsuite.app/BibKit/"
-                class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
+            <a href="https://siliconsuite.app/BibKit/" data-tags="latex pdf"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
                 <div
                     class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-500/30 transition-colors duration-500">
                 </div>
 
                 <div class="relative z-10 flex-grow">
                     <img src="./assets/bibkit.png" alt="BibKit Icon"
-                        class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
                     <div class="flex items-center gap-3 mb-3">
-                        <h2 class="text-3xl font-bold">BibKit</h2>
+                        <h2 class="text-2xl font-bold">BibKit</h2>
                         <span
                             class="px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">New</span>
                     </div>
-                    <p class="text-gray-400 text-lg leading-relaxed">
+                    <p class="text-gray-400 leading-relaxed">
                         A seductive BibTeX library for researchers. Drop PDFs, summon clean citations, polish metadata,
                         and export LaTeX-ready references without wrestling a dusty database.
                     </p>
                 </div>
                 <div
-                    class="relative z-10 mt-8 flex items-center text-emerald-400 font-semibold group-hover:translate-x-1 transition-transform">
-                    View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
+                    class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-emerald-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac &middot; iPad</span>
                 </div>
             </a>
 
-
             <!-- GhostTeX -->
-            <a href="https://siliconsuite.app/GhostTex/"
-                class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
+            <a href="https://siliconsuite.app/GhostTex/" data-tags="latex ai pdf"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
                 <div
                     class="absolute top-0 right-0 w-64 h-64 bg-teal-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-teal-500/30 transition-colors duration-500">
                 </div>
 
                 <div class="relative z-10 flex-grow">
                     <img src="./assets/ghosttex.png" alt="GhostTeX Icon"
-                        class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
                     <div class="flex items-center gap-3 mb-3">
-                        <h2 class="text-3xl font-bold">GhostTeX</h2>
+                        <h2 class="text-2xl font-bold">GhostTeX</h2>
                         <span
-                            class="px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">Now Available</span>
+                            class="px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">Now
+                            Available</span>
                     </div>
-                    <p class="text-gray-400 text-lg leading-relaxed">
-                        PDF & handwriting to LaTeX with on-device AI. Drop a paper, crop an equation, get
+                    <p class="text-gray-400 leading-relaxed">
+                        PDF &amp; handwriting to LaTeX with on-device AI. Drop a paper, crop an equation, get
                         publication-ready TeX. Powered by Qwen3-VL on Apple Silicon.
                     </p>
                 </div>
-                <div
-                    class="relative z-10 mt-8 flex items-center text-teal-400 font-semibold group-hover:translate-x-1 transition-transform">
-                    View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
+                <div class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-teal-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac</span>
                 </div>
             </a>
 
             <!-- SteadyFlow -->
-            <a href="https://siliconsuite.app/SteadyFlow/"
-                class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
+            <a href="https://siliconsuite.app/SteadyFlow/" data-tags="video ai"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
                 <div
                     class="absolute top-0 right-0 w-64 h-64 bg-cyan-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-cyan-500/30 transition-colors duration-500">
                 </div>
 
                 <div class="relative z-10 flex-grow">
                     <img src="./assets/steadyflow.jpg" alt="SteadyFlow Icon"
-                        class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
-                    <h2 class="text-3xl font-bold mb-3">SteadyFlow</h2>
-                    <p class="text-gray-400 text-lg leading-relaxed">
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
+                    <h2 class="text-2xl font-bold mb-3">SteadyFlow</h2>
+                    <p class="text-gray-400 leading-relaxed">
                         Cinematic Intelligence for Your Images. <br><br>
                         Drop photos. Pick a vibe. Your video cuts to the beat—automatically. No timeline, no editing,
                         just AI-powered cinema on Apple Silicon.
                     </p>
                 </div>
                 <div
-                    class="relative z-10 mt-8 flex items-center text-cyan-400 font-semibold group-hover:translate-x-1 transition-transform">
-                    View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
+                    class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-cyan-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac &middot; iPhone &middot; iPad</span>
                 </div>
             </a>
 
             <!-- FlowCompressor -->
-            <a href="https://siliconsuite.app/FlowCompressor/"
-                class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
+            <a href="https://siliconsuite.app/FlowCompressor/" data-tags="video"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
                 <div
                     class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/30 transition-colors duration-500">
                 </div>
 
                 <div class="relative z-10 flex-grow">
                     <img src="./assets/flowcompressor.png" alt="FlowCompressor Icon"
-                        class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
                     <div class="flex items-center gap-3 mb-3">
-                        <h2 class="text-3xl font-bold">FlowCompressor</h2>
+                        <h2 class="text-2xl font-bold">FlowCompressor</h2>
                         <span
                             class="px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">Available</span>
                     </div>
-                    <p class="text-gray-400 text-lg leading-relaxed">
+                    <p class="text-gray-400 leading-relaxed">
                         Distill your vision. A masterfully crafted batch video compressor for macOS. Fast, elegant, and
                         powerful.
                     </p>
                 </div>
-                <div
-                    class="relative z-10 mt-8 flex items-center text-blue-400 font-semibold group-hover:translate-x-1 transition-transform">
-                    View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
-                </div>
-            </a>
-
-
-        </div>
-
-        <!-- Complimentary Tools -->
-        <div class="mt-32 w-full max-w-5xl">
-            <h2 class="text-3xl font-bold mb-12 brand-font text-center">Complimentary Utilities</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                <!-- PDFShuffle -->
-                <a href="https://siliconsuite.app/PDFShuffle/"
-                    class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
-                    <div
-                        class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/30 transition-colors duration-500">
-                    </div>
-
-                    <div class="relative z-10 flex-grow">
-                        <img src="./assets/pdfshuffle.png" alt="PDFShuffle Icon"
-                            class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
-                        <div class="flex items-center gap-3 mb-3">
-                            <h2 class="text-3xl font-bold">PDFShuffle</h2>
-                            <span
-                                class="px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">Free</span>
-                        </div>
-                        <p class="text-gray-400 text-md leading-relaxed">
-                            Visual page management. Drag, drop, merge, and split PDF pages with a beautiful native
-                            interface.
-                        </p>
-                    </div>
-                    <div
-                        class="relative z-10 mt-8 flex items-center text-indigo-400 font-semibold group-hover:translate-x-1 transition-transform">
-                        Explore Tool <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                        </svg>
-                    </div>
-                </a>
-
-                <!-- LaTeX & BibTeX Tools -->
-                <a href="https://siliconsuite.app/latex-bibtex-tools_APP/"
-                    class="suite-card group rounded-3xl p-8 relative overflow-hidden flex flex-col min-h-[300px]">
-                    <div
-                        class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/30 transition-colors duration-500">
-                    </div>
-
-                    <div class="relative z-10 flex-grow">
-                        <img src="./assets/latextools.png" alt="LaTeX Tools Icon"
-                            class="app-icon w-20 h-20 rounded-[1.25rem] mb-6 border border-white/10">
-                        <div class="flex items-center gap-3 mb-3">
-                            <h2 class="text-3xl font-bold">LaTeX & BibTeX</h2>
-                            <span
-                                class="px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">$1.99</span>
-                        </div>
-                        <p class="text-gray-400 text-md leading-relaxed">
-                            Professional manuscript preparation. Rename figures and format BibTeX entries for journal
-                            submission.
-                        </p>
-                    </div>
-                    <div
-                        class="relative z-10 mt-8 flex items-center text-blue-400 font-semibold group-hover:translate-x-1 transition-transform">
+                <div class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-blue-400 font-semibold group-hover:translate-x-1 transition-transform">
                         View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                         </svg>
+                    </span>
+                    <span class="platform">Mac</span>
+                </div>
+            </a>
+
+            <!-- PDFShuffle -->
+            <a href="https://siliconsuite.app/PDFShuffle/" data-tags="pdf"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
+                <div
+                    class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/30 transition-colors duration-500">
+                </div>
+
+                <div class="relative z-10 flex-grow">
+                    <img src="./assets/pdfshuffle.png" alt="PDFShuffle Icon"
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
+                    <div class="flex items-center gap-3 mb-3">
+                        <h2 class="text-2xl font-bold">PDFShuffle</h2>
+                        <span
+                            class="px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-wider">Free</span>
                     </div>
-                </a>
-            </div>
+                    <p class="text-gray-400 leading-relaxed">
+                        Visual page management. Drag, drop, merge, and split PDF pages with a beautiful native
+                        interface.
+                    </p>
+                </div>
+                <div class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-indigo-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        Explore Tool <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac</span>
+                </div>
+            </a>
+
+            <!-- LaTeX & BibTeX Tools -->
+            <a href="https://siliconsuite.app/latex-bibtex-tools_APP/" data-tags="latex"
+                class="suite-card reveal group rounded-3xl p-7 overflow-hidden flex flex-col min-h-[300px]">
+                <div
+                    class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/30 transition-colors duration-500">
+                </div>
+
+                <div class="relative z-10 flex-grow">
+                    <img src="./assets/latextools.png" alt="LaTeX Tools Icon"
+                        class="app-icon w-16 h-16 rounded-[1.1rem] mb-5 border border-white/10">
+                    <h2 class="text-2xl font-bold mb-3">LaTeX &amp; BibTeX</h2>
+                    <p class="text-gray-400 leading-relaxed">
+                        Professional manuscript preparation. Rename figures and format BibTeX entries for journal
+                        submission.
+                    </p>
+                </div>
+                <div class="relative z-10 mt-7 flex items-center justify-between gap-3">
+                    <span
+                        class="flex items-center text-blue-400 font-semibold group-hover:translate-x-1 transition-transform">
+                        View App <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                    <span class="platform">Mac</span>
+                </div>
+            </a>
         </div>
+
+        <!-- Why -->
+        <section id="why" class="mt-32 w-full max-w-6xl scroll-mt-24">
+            <h2 class="text-3xl md:text-4xl font-bold brand-font mb-3 text-center">Three promises</h2>
+            <p class="text-gray-500 text-center mb-12">Boring ones. That's the point.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="reveal suite-card rounded-3xl p-8">
+                    <div class="text-3xl mb-4">🔒</div>
+                    <h3 class="text-xl font-bold mb-2">Your files stay yours</h3>
+                    <p class="text-gray-400 leading-relaxed">Every byte is processed locally. Nothing is uploaded,
+                        nothing is logged, nothing phones home.</p>
+                </div>
+                <div class="reveal suite-card rounded-3xl p-8">
+                    <div class="text-3xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold mb-2">Native, not a browser</h3>
+                    <p class="text-gray-400 leading-relaxed">Written for Apple Silicon. Launches instantly, sips
+                        battery, feels like the Mac it runs on.</p>
+                </div>
+                <div class="reveal suite-card rounded-3xl p-8">
+                    <div class="text-3xl mb-4">🧾</div>
+                    <h3 class="text-xl font-bold mb-2">Pricing without games</h3>
+                    <p class="text-gray-400 leading-relaxed">Plain, stated-up-front pricing — no seats, no upsell modal at 2am.
+                        Some tools are simply free.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section
+            class="reveal mt-24 w-full max-w-6xl rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-10 md:p-14 text-center overflow-hidden relative">
+            <div
+                class="absolute -top-20 left-1/2 -translate-x-1/2 w-[420px] h-[420px] bg-purple-500/20 blur-[110px] rounded-full">
+            </div>
+            <div class="relative z-10">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Missing a tool you need?</h2>
+                <p class="text-gray-400 mb-8 max-w-xl mx-auto">Tell me what part of your workflow is still annoying.
+                    A lot of these apps started as exactly that email.</p>
+                <a href="mailto:ou.salman@icloud.com"
+                    class="inline-block px-7 py-3 rounded-full bg-white text-black font-semibold hover:scale-105 active:scale-95 transition-transform">Send
+                    an idea</a>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
-    <footer class="py-12 border-t border-white/10 mt-auto">
+    <footer class="py-12 border-t border-white/10 mt-auto relative z-10">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <p class="text-gray-500 text-sm">© 2026 Lale Taneri. All rights reserved.</p>
-            <a href="https://www.nxgntools.com/tools/ghostpdf?utm_source=ghostpdf" target="_blank" rel="noopener"
-                style="display: inline-block; width: auto;">
-                <img src="https://www.nxgntools.com/api/embed/ghostpdf?type=LAUNCHING_SOON_ON"
-                    alt="NextGen Tools Badge - The #1 AI Tools Directory & Launch Platform"
-                    style="height: 48px; width: auto;" />
-            </a>
+            <div class="flex flex-wrap items-center justify-center gap-5">
+                <a href="https://www.nxgntools.com/tools/ghostpdf?utm_source=ghostpdf" target="_blank" rel="noopener"
+                    style="display: inline-block; width: auto;">
+                    <img src="https://www.nxgntools.com/api/embed/ghostpdf?type=LAUNCHING_SOON_ON"
+                        alt="NextGen Tools Badge - The #1 AI Tools Directory & Launch Platform"
+                        style="height: 48px; width: auto;" />
+                </a>
+                <a href="https://www.producthunt.com/products/autoplot?utm_source=badge-follow&amp;utm_medium=badge&amp;utm_source=badge-autoplot"
+                    target="_blank" rel="noopener">
+                    <img src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=1273605&amp;theme=light"
+                        alt="Autoplot - Unify&#0032;data&#0032;analysis&#0032;and&#0032;plotting&#0032;in&#0032;one&#0032;powerful&#0032;workspace | Product Hunt"
+                        style="width: 250px; height: 54px;" width="250" height="54" />
+                </a>
+            </div>
             <div class="flex items-center gap-6 text-sm">
                 <a href="#" class="text-gray-500 hover:text-white transition">Privacy</a>
                 <a href="mailto:ou.salman@icloud.com" class="text-gray-500 hover:text-white transition">Contact</a>
-                <a href="#" class="text-gray-500 hover:text-white transition">Twitter (X)</a>
             </div>
         </div>
     </footer>
 
+    <script>
+        (function () {
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            /* ---- scroll progress + nav ---- */
+            const progress = document.getElementById('progress');
+            const nav = document.getElementById('nav');
+            const onScroll = () => {
+                const h = document.documentElement.scrollHeight - window.innerHeight;
+                progress.style.transform = 'scaleX(' + (h > 0 ? window.scrollY / h : 0) + ')';
+                nav.classList.toggle('backdrop-blur-xl', window.scrollY > 20);
+                nav.classList.toggle('bg-black/60', window.scrollY > 20);
+                nav.classList.toggle('border-white/10', window.scrollY > 20);
+            };
+            document.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+
+            /* ---- headline rotator ---- */
+            const rotator = document.getElementById('rotator');
+            const phrases = [
+                'minds its own business.',
+                'leaves nothing on a server.',
+                'runs on your Mac, only.',
+                'is priced without games.',
+                'has no opinion about you.'
+            ];
+            if (rotator && !reduced) {
+                let pi = 0, ci = phrases[0].length, deleting = true;
+                const tick = () => {
+                    const word = phrases[pi];
+                    if (deleting) {
+                        ci--;
+                        if (ci <= 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+                    } else {
+                        ci++;
+                        if (ci >= phrases[pi].length) { deleting = true; rotator.textContent = phrases[pi]; setTimeout(tick, 2600); return; }
+                    }
+                    rotator.textContent = phrases[pi].slice(0, ci);
+                    setTimeout(tick, deleting ? 28 : 55);
+                };
+                setTimeout(tick, 2600);
+            }
+
+            /* ---- reveal on scroll ---- */
+            const reveals = Array.from(document.querySelectorAll('.reveal'));
+            const revealAll = () => reveals.forEach(el => el.classList.add('in'));
+
+            if (reduced || !('IntersectionObserver' in window)) { revealAll(); }
+            // safety net: if the observer never reports anything, never leave the page blank
+            setTimeout(() => { if (!document.querySelector('.reveal.in')) revealAll(); }, 2000);
+
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((e, i) => {
+                    if (e.isIntersecting) {
+                        e.target.style.transitionDelay = Math.min(i * 60, 240) + 'ms';
+                        e.target.classList.add('in');
+                        io.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+            reveals.forEach(el => io.observe(el));
+
+            /* ---- counters ---- */
+            const counters = document.querySelectorAll('[data-count]');
+            const cio = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (!e.isIntersecting) return;
+                    const el = e.target, target = +el.dataset.count;
+                    cio.unobserve(el);
+                    if (reduced || target === 0) { el.textContent = target; return; }
+                    let cur = 0;
+                    const step = () => {
+                        cur += Math.max(1, Math.ceil((target - cur) / 8));
+                        if (cur >= target) { el.textContent = target; return; }
+                        el.textContent = cur;
+                        requestAnimationFrame(step);
+                    };
+                    step();
+                });
+            }, { threshold: 1 });
+            counters.forEach(c => cio.observe(c));
+
+            /* ---- card spotlight + tilt ---- */
+            const cards = Array.from(document.querySelectorAll('.suite-card'));
+            if (!reduced && window.matchMedia('(hover: hover)').matches) {
+                cards.forEach(card => {
+                    card.addEventListener('pointermove', (ev) => {
+                        const r = card.getBoundingClientRect();
+                        const x = ev.clientX - r.left, y = ev.clientY - r.top;
+                        card.style.setProperty('--mx', x + 'px');
+                        card.style.setProperty('--my', y + 'px');
+                        const rx = ((y / r.height) - 0.5) * -5;
+                        const ry = ((x / r.width) - 0.5) * 6;
+                        card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-6px)`;
+                    });
+                    card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+                });
+            }
+
+            /* ---- category filter ---- */
+            const appCards = Array.from(document.querySelectorAll('#grid .suite-card'));
+            const pills = Array.from(document.querySelectorAll('.pill'));
+            let filter = 'all';
+
+            function apply() {
+                appCards.forEach(card => {
+                    const tags = (card.dataset.tags || '').split(' ');
+                    const ok = filter === 'all' || tags.includes(filter);
+                    card.classList.toggle('card-hidden', !ok);
+                });
+            }
+
+            pills.forEach(p => p.addEventListener('click', () => {
+                filter = p.dataset.filter;
+                pills.forEach(o => o.setAttribute('aria-pressed', String(o === p)));
+                apply();
+            }));
+
+            /* ---- I'm feeling lucky ---- */
+            document.getElementById('luckyBtn').addEventListener('click', () => {
+                const visible = appCards.filter(c => !c.classList.contains('card-hidden'));
+                const pick = visible[Math.floor(Math.random() * visible.length)];
+                if (!pick) return;
+                pick.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+                pick.animate(
+                    [{ boxShadow: '0 0 0 0 rgba(255,255,255,.55)' }, { boxShadow: '0 0 0 14px rgba(255,255,255,0)' }],
+                    { duration: 900, easing: 'ease-out' }
+                );
+            });
+        })();
+    </script>
 </body>
 
 </html>
