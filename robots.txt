@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://siliconsuite.app/sitemap.xml
+Sitemap: https://siliconsuite.app/NinjaScan/sitemap.xml

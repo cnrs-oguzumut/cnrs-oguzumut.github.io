@@ -1,0 +1,25 @@
+# Silicon Suite
+
+> Silicon Suite is a family of native Apple apps by Lale Taneri that do their work on the device: nothing is uploaded and there is no telemetry. Most are Mac utilities for PDFs, research writing and video; NinjaScan Docs is an iPhone document scanner.
+
+- Website: https://siliconsuite.app/
+- Contact: ou.salman@icloud.com
+
+## Apps
+
+- [NinjaScan Docs](https://siliconsuite.app/NinjaScan/): private document and ID card scanner for iPhone. Scans paper and identity cards into tidy, named PDFs, prints ID cards at real size, blacks out private parts, signs pages. No account, no ads, one-time purchase instead of a subscription. Details for language models: https://siliconsuite.app/NinjaScan/llms.txt
+- [GhostPDF+](https://siliconsuite.app/GhostPDF-Bundle/): offline PDF compressor for Mac. Every page is processed on the Mac.
+- [CleverGhost](https://siliconsuite.app/CleverGhost/): on-device AI document analysis for Mac. Chat with PDFs locally.
+- [AutoPlot](https://autoplot.ai): scientific plotting and analysis for Mac. Import data, fit it, plot in 2D and 3D, and publish figures.
+- [BibKit](https://siliconsuite.app/BibKit/): BibTeX library for researchers, for Mac and iPad. Drop PDFs, get clean citations, export LaTeX-ready references.
+- [GhostTeX](https://siliconsuite.app/GhostTex/): PDF and handwriting to LaTeX with on-device AI, for Mac.
+- [SteadyFlow](https://siliconsuite.app/SteadyFlow/): turns photos into a video cut to the beat, for Mac, iPhone and iPad.
+- [FlowCompressor](https://siliconsuite.app/FlowCompressor/): batch video compressor for Mac.
+- [PDFShuffle](https://siliconsuite.app/PDFShuffle/): free tool for Mac to drag, drop, merge and split PDF pages.
+- [LaTeX & BibTeX Tools](https://siliconsuite.app/latex-bibtex-tools_APP/): manuscript preparation for Mac. Rename figures and format BibTeX entries for journal submission.
+
+## What the apps have in common
+
+- Files are processed locally. Nothing is uploaded and nothing is logged.
+- Native apps written for Apple Silicon, not web wrappers.
+- Pricing is stated up front; some tools are free.
