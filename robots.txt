@@ -4,3 +4,4 @@ Allow: /
 Sitemap: https://siliconsuite.app/sitemap.xml
 Sitemap: https://siliconsuite.app/NinjaScan/sitemap.xml
 Sitemap: https://siliconsuite.app/CleverGhost/sitemap.xml
+Sitemap: https://siliconsuite.app/SteadyFlow/sitemap.xml
